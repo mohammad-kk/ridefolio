@@ -41,11 +41,11 @@ const Index = () => {
           
           <div className="mt-16 relative animate-fade-up">
             <div className="aspect-[16/9] rounded-2xl overflow-hidden">
-              <img 
-                src="https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&q=80"
-                alt="Luxury car showcase"
-                className="w-full h-full object-cover"
-              />
+            <img
+          src="https://www.f1-fansite.com/wp-content/uploads/2023/05/2023-Monaco-Grand-Prix-Sunday-10.jpg"
+          alt="Cover"
+          className="w-full h-full object-cover object-center transform scale-105"
+        />
             </div>
           </div>
         </div>

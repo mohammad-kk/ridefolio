@@ -78,6 +78,12 @@ export function CarDetailsDialog({
                   <p className="text-muted-foreground">{car.description}</p>
                 </div>
               )}
+            <div className="flex justify-end">
+              <Button onClick={() => setIsEditDialogOpen(true)}>
+                Edit Car Details
+              </Button>
+            </div>
+              
             </div>
 
             <Separator />
@@ -106,11 +112,7 @@ export function CarDetailsDialog({
               </div>
             </div>
 
-            <div className="flex justify-end">
-              <Button onClick={() => setIsEditDialogOpen(true)}>
-                Edit Car Details
-              </Button>
-            </div>
+
           </div>
         </DialogContent>
       </Dialog>

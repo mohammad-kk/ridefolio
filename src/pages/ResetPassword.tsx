@@ -6,27 +6,46 @@ import { useForm } from "react-hook-form";
 import * as z from "zod";
 import Navigation from "@/components/Navigation";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+import { useState } from "react";
 
 const formSchema = z.object({
-  email: z.string().email("Invalid email address"),
   password: z.string().min(8, "Password must be at least 8 characters"),
+  confirmPassword: z.string(),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Passwords don't match",
+  path: ["confirmPassword"],
 });
 
-const SignIn = () => {
+const ResetPassword = () => {
   const navigate = useNavigate();
-  const { signIn } = useAuth();
+  const [isLoading, setIsLoading] = useState(false);
   
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      email: "",
       password: "",
+      confirmPassword: "",
     },
   });
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    await signIn(values.email, values.password);
+    try {
+      setIsLoading(true);
+      const { error } = await supabase.auth.updateUser({
+        password: values.password
+      });
+      
+      if (error) throw error;
+      
+      toast.success("Password has been reset successfully!");
+      navigate("/signin");
+    } catch (error: any) {
+      toast.error(error.message);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -35,9 +54,9 @@ const SignIn = () => {
       <div className="container max-w-md mx-auto pt-24 px-4">
         <div className="space-y-6">
           <div className="space-y-2 text-center">
-            <h1 className="text-3xl font-bold">Welcome back</h1>
+            <h1 className="text-3xl font-bold">Set New Password</h1>
             <p className="text-muted-foreground">
-              Enter your credentials to sign in
+              Enter your new password below
             </p>
           </div>
 
@@ -45,14 +64,14 @@ const SignIn = () => {
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               <FormField
                 control={form.control}
-                name="email"
+                name="password"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Email</FormLabel>
+                    <FormLabel>New Password</FormLabel>
                     <FormControl>
                       <Input 
-                        type="email" 
-                        placeholder="john@example.com"
+                        type="password" 
+                        placeholder="••••••••" 
                         {...field} 
                       />
                     </FormControl>
@@ -63,14 +82,14 @@ const SignIn = () => {
 
               <FormField
                 control={form.control}
-                name="password"
+                name="confirmPassword"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Password</FormLabel>
+                    <FormLabel>Confirm Password</FormLabel>
                     <FormControl>
                       <Input 
                         type="password" 
-                        placeholder="••••••••"
+                        placeholder="••••••••" 
                         {...field} 
                       />
                     </FormControl>
@@ -79,31 +98,13 @@ const SignIn = () => {
                 )}
               />
 
-              <div className="space-y-4">
-                <Button type="submit" className="w-full">
-                  Sign In
-                </Button>
-
-                <Button
-                  type="button"
-                  variant="ghost"
-                  className="w-full"
-                  onClick={() => navigate("/forgot-password")}
-                >
-                  Forgot your password?
-                </Button>
-              </div>
-
-              <p className="text-center text-sm text-muted-foreground">
-                Not a user?{" "}
-                <button
-                  type="button"
-                  className="font-medium text-primary underline-offset-4 hover:underline"
-                  onClick={() => navigate("/signup")}
-                >
-                  Sign up here
-                </button>
-              </p>
+              <Button 
+                type="submit" 
+                className="w-full"
+                disabled={isLoading}
+              >
+                {isLoading ? "Resetting Password..." : "Reset Password"}
+              </Button>
             </form>
           </Form>
         </div>
@@ -112,4 +113,4 @@ const SignIn = () => {
   );
 };
 
-export default SignIn;
+export default ResetPassword;

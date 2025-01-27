@@ -6,27 +6,41 @@ import { useForm } from "react-hook-form";
 import * as z from "zod";
 import Navigation from "@/components/Navigation";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+import { useState } from "react";
 
 const formSchema = z.object({
   email: z.string().email("Invalid email address"),
-  password: z.string().min(8, "Password must be at least 8 characters"),
 });
 
-const SignIn = () => {
+const ForgotPassword = () => {
   const navigate = useNavigate();
-  const { signIn } = useAuth();
+  const [isLoading, setIsLoading] = useState(false);
   
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       email: "",
-      password: "",
     },
   });
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    await signIn(values.email, values.password);
+    try {
+      setIsLoading(true);
+      const { error } = await supabase.auth.resetPasswordForEmail(values.email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+      
+      if (error) throw error;
+      
+      toast.success("Password reset link sent to your email!");
+      navigate("/signin");
+    } catch (error: any) {
+      toast.error(error.message);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -35,9 +49,9 @@ const SignIn = () => {
       <div className="container max-w-md mx-auto pt-24 px-4">
         <div className="space-y-6">
           <div className="space-y-2 text-center">
-            <h1 className="text-3xl font-bold">Welcome back</h1>
+            <h1 className="text-3xl font-bold">Reset Password</h1>
             <p className="text-muted-foreground">
-              Enter your credentials to sign in
+              Enter your email to receive a password reset link
             </p>
           </div>
 
@@ -52,25 +66,7 @@ const SignIn = () => {
                     <FormControl>
                       <Input 
                         type="email" 
-                        placeholder="john@example.com"
-                        {...field} 
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Password</FormLabel>
-                    <FormControl>
-                      <Input 
-                        type="password" 
-                        placeholder="••••••••"
+                        placeholder="john@example.com" 
                         {...field} 
                       />
                     </FormControl>
@@ -80,30 +76,23 @@ const SignIn = () => {
               />
 
               <div className="space-y-4">
-                <Button type="submit" className="w-full">
-                  Sign In
+                <Button 
+                  type="submit" 
+                  className="w-full"
+                  disabled={isLoading}
+                >
+                  {isLoading ? "Sending reset link..." : "Send Reset Link"}
                 </Button>
 
                 <Button
                   type="button"
                   variant="ghost"
                   className="w-full"
-                  onClick={() => navigate("/forgot-password")}
+                  onClick={() => navigate("/signin")}
                 >
-                  Forgot your password?
+                  Back to Sign In
                 </Button>
               </div>
-
-              <p className="text-center text-sm text-muted-foreground">
-                Not a user?{" "}
-                <button
-                  type="button"
-                  className="font-medium text-primary underline-offset-4 hover:underline"
-                  onClick={() => navigate("/signup")}
-                >
-                  Sign up here
-                </button>
-              </p>
             </form>
           </Form>
         </div>
@@ -112,4 +101,4 @@ const SignIn = () => {
   );
 };
 
-export default SignIn;
+export default ForgotPassword;

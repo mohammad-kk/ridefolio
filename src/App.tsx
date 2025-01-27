@@ -9,6 +9,8 @@ import SignUp from "./pages/SignUp";
 import SignIn from "./pages/SignIn";
 import Dashboard from "./pages/Dashboard";
 import AddCar from "./pages/AddCar";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 
 const queryClient = new QueryClient();
 
@@ -23,6 +25,8 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/signup" element={<SignUp />} />
             <Route path="/signin" element={<SignIn />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/add-car" element={<AddCar />} />
           </Routes>

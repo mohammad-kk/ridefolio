@@ -160,7 +160,7 @@ export function AddModificationDialog({ carId, onModificationAdded }: AddModific
               value={price}
               onChange={(e) => setPrice(e.target.value)}
               min="0"
-              step="0.01"
+              step="50.0"
             />
           </div>
 
